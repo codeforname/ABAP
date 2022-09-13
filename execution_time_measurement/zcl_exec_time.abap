@@ -85,6 +85,7 @@ CLASS zcl_exec_time IMPLEMENTATION.
   METHOD stop.
 
     DATA: ls_exec_time TYPE ty_s_exec_time,
+          lv_created_order TYPE N LENGTH 7,
           lv_exec_time_start TYPE timestampl,
           lv_exec_time_end TYPE timestampl,
           lv_exec_time_differ TYPE timestampl.
@@ -93,8 +94,9 @@ CLASS zcl_exec_time IMPLEMENTATION.
     IF ls_exec_time IS INITIAL.
       RETURN.
     ENDIF.
-
-    lv_exec_time_start = |{ ls_exec_time-created_date }{ ls_exec_time-created_time }.{ ls_exec_time-created_order }|.
+    
+    lv_created_order = 10000000 - ls_exec_time-created_order.
+    lv_exec_time_start = |{ ls_exec_time-created_date }{ ls_exec_time-created_time }.{ lv_created_order }|.
     lv_exec_time_end = get_timestamp( ).
     lv_exec_time_differ = cl_abap_tstmp=>subtract( tstmp1 = lv_exec_time_end tstmp2 = lv_exec_time_start ).
 
@@ -165,8 +167,8 @@ CLASS zcl_exec_time IMPLEMENTATION.
     ls_exec_time-duration = iv_duration.
     ls_exec_time-created_date = slice( iv_begin = 0 iv_end = 8 iv_value = lv_timestamp ).
     ls_exec_time-created_time = slice( iv_begin = 8 iv_end = 14 iv_value = lv_timestamp ).
-    ls_exec_time-created_order = slice( iv_begin = -7 iv_value = lv_timestamp ).
-
+    ls_exec_time-created_order = 10000000 + slice( iv_begin = -7 iv_value = lv_timestamp ).
+    
     APPEND ls_exec_time TO mt_exec_time.
     rr_me = me.
 
