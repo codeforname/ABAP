@@ -77,7 +77,13 @@ CLASS zcl_utils DEFINITION
         RETURNING VALUE(rv_date) TYPE dats,
       fragment
         IMPORTING iv_value type STRING
-        CHANGING ct_table type STANDARD TABLE .
+        CHANGING ct_table type STANDARD TABLE,
+  
+    " other
+      calculate_hash
+        IMPORTING iv_content     TYPE string
+                  iv_key         TYPE string OPTIONAL
+        RETURNING VALUE(rv_hash) TYPE string.
 
   PRIVATE SECTION.
 
@@ -653,4 +659,41 @@ CLASS ZCL_UTILS IMPLEMENTATION.
 
   ENDMETHOD.
 
+  METHOD calculate_hash.
+    CLEAR rv_hash.
+
+    DATA: lv_data TYPE string,
+          lv_len  TYPE i,
+          lv_key  TYPE xstring.
+
+    IF iv_key IS SUPPLIED.
+      CALL FUNCTION 'SCMS_STRING_TO_XSTRING'
+        EXPORTING
+          text   = iv_key
+        IMPORTING
+          buffer = lv_key
+        EXCEPTIONS
+          failed = 1
+          OTHERS = 2.
+
+      IF sy-subrc <> 0.
+        CLEAR lv_key.
+      ENDIF.
+    ENDIF.
+
+    lv_len = strlen( iv_content ).
+
+    cl_abap_hmac=>calculate_hmac_for_char(
+      EXPORTING
+        if_algorithm = 'SHA256'
+        if_key = lv_key
+        if_data = iv_content
+        if_length = lv_len
+      IMPORTING
+        ef_hmacstring = rv_hash
+    ).
+
+    TRANSLATE rv_hash TO UPPER CASE.
+  ENDMETHOD.
+  
 ENDCLASS.
