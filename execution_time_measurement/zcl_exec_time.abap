@@ -95,7 +95,11 @@ CLASS zcl_exec_time IMPLEMENTATION.
       RETURN.
     ENDIF.
     
-    lv_created_order = 10000000 - ls_exec_time-created_order.
+    IF ls_exec_time-created_order > 10000000.
+      lv_created_order = ls_exec_time-created_order - 10000000.
+    ELSE.
+      lv_created_order = 10000000 - ls_exec_time-created_order.
+    ENDIF.
     lv_exec_time_start = |{ ls_exec_time-created_date }{ ls_exec_time-created_time }.{ lv_created_order }|.
     lv_exec_time_end = get_timestamp( ).
     lv_exec_time_differ = cl_abap_tstmp=>subtract( tstmp1 = lv_exec_time_end tstmp2 = lv_exec_time_start ).
